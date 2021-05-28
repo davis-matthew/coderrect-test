@@ -1,34 +1,25 @@
-#include <pthread.h>
 #include <unistd.h>
 #include <cstdlib>
 #include <stdio.h>
 #include <string.h>
-
-int var = 3;
-void* incthread(void* tid){
-    var++;
-}
+#include <omp.h>
 
 int main(){
-    pthread_t t1;
-    pthread_create(&t1,NULL,incthread,NULL);
-    var = 2;
-    //--------------------------------------//
-    int arr[] = {1,2,3,4};    
-    #pragma omp parallel for
-    for(int i =1;i<4;i++){
-        arr[i] = arr[i-1] + 20;
+    int should_be_four = 0, thread_counter = 0;
+
+    //--------------Race 1------------------//
+    #pragma omp parallel for //reduction(+:var)
+    for(int i =0;i<4;i++){ should_be_four++; }
+    
+    //--------------Race 2------------------//
+    #pragma omp parallel 
+    {
+        //#pragma omp critical
+        //{    
+            thread_counter++; 
+        //}
     }
 
-
-
-
-
-
-    printf("var = %d\n",var);
-    printf("arr = {");
-    for(int i = 0;i<4;i++){
-        printf("%d,",arr[i]);   
-    }
-    puts("\b}");
+    //--------------Output-----------------//
+    printf("should_be_four = %d, thread_counter = %d (should be %d)\n",should_be_four,thread_counter,omp_get_max_threads());
 }
