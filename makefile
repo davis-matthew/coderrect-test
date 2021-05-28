@@ -1,2 +1,2 @@
 main : main.cpp
-	g++ -fopenmp -lpthread -g main.cpp -o main
+	g++ -fopenmp -g main.cpp -o main
